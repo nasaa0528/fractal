@@ -70,6 +70,7 @@ int main(int argc, char **argv)
 		// cout << "ID is:\t" << id << "\tsize:\t" << nproc << "\tdomainWidth:\t" << domainWidth << "\tdomainHeight:\t" << domainHeight << "\tscale:\t" << scale << "\tmaxIterations:\t" << maxIterations << "\tK:\t" << K << "\tcenter:\t" << center << "\n\n" << endl; 
 		
 	/************* MASTER PROCESS DOES ITS JOB STARTS HERE ******************/
+	/************* LOOP SPLITTING METHOD ... FOR DECOMPOSITION ******************/
 		// for (unsigned int y = 0; y < domainHeight; ++y)
 		for (unsigned int y = id; y < domainHeight; y+=nproc)
 		{
