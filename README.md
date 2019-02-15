@@ -2,7 +2,7 @@
 AUTHORS: <br />
 1. NASANTOGTOKH AMARSAIKHAN 
 2. MUSSA EBRAHIM 
-3. NEDAL ESKAIF <br />
+3. NEDAL ESKAIF <br /> 
 DATE: <br />
 	15-FEB-2019  <br />
 Description: <br />
