@@ -1,11 +1,10 @@
-// Fractal.cpp : Defines the entry point for the console application.
-//
-
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <complex>
 #include <mpi.h>
+#define TRUE 1 
+#define FALSE 0
 using namespace std;
 
 void WriteTGA_RGB(const char* filename, unsigned char* data, unsigned int width, unsigned int height)
@@ -50,19 +49,54 @@ int main(int argc, char **argv)
 	// MPI declarations 
 	int id, nproc; 
 	MPI_Status status; 
+	int image_flag = TRUE;
 
-	const unsigned int domainWidth = 1024;
-	const unsigned int domainHeight = 1024;
-
-	complex<double> K(0.353, 0.288);
-	complex<double> center(-1.68, -1.23);
-	double scale = 2.35;
-	const unsigned int maxIterations = 100;
-
+	// const unsigned int domainWidth = 1024;
+	// const unsigned int domainHeight = 1024;
+	// const unsigned int maxIterations = 100;
+	// const unsigned int domainWidth;
+	// const unsigned int domainHeight; 
+	// const unsigned int maxIterations; 
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &id);
 	MPI_Comm_size(MPI_COMM_WORLD, &nproc);
+
+	if(argc < 4){
+		printf("Usage: \n"); 
+		printf("mpirun fractal -np <number of nodes> fractal <Width> <Height> <number of iteration> <--noimage>\n");
+		printf("\t<number of nodes>         Number of nodes for parallelization\n");
+		printf("\t<Width>                   Width of the resulting image, which defines resolution of image\n");
+		printf("\t<Height>                  Height of the resulting image, which defines resolution of image\n");
+		printf("\t<number of iteration>     Max iteration before decision\n");
+		printf("\t<--noimage>               (Optional) with this flag program will not write image to file.\n");
+		printf("\tExample:\n");
+		printf("\t\tbash$:mpirun fractal 1024 1024 100 --noimage\n");
+		printf("\t\tWith this positional parameters it will calculate Mandelbrot set within 1024x1024 dimension and by iterating 100 at most\n");
+		MPI_Abort(MPI_COMM_WORLD, 1);
+		exit(1);
+	}
+	else if (argc == 4 || argc == 5){
+		const unsigned int domainWidth = (unsigned int)atoi(argv[1]);
+		const unsigned int domainHeight = (unsigned int)atoi(argv[2]);
+		const unsigned int maxIterations = (unsigned int)atoi(argv[3]);
+		if(argc == 5){
+			string noimage = argv[4];
+			if(noimage == "--noimage")
+				image_flag = FALSE;
+		}
+	}
+	const unsigned int domainWidth = (unsigned int)atoi(argv[1]);
+	const unsigned int domainHeight = (unsigned int)atoi(argv[2]);
+	const unsigned int maxIterations = (unsigned int)atoi(argv[3]);
+
+
+	complex<double> K(0.353, 0.288);
+	complex<double> center(-1.68, -1.23);
+	double scale = 2.35;
+
+
+
 	unsigned char *data = new unsigned char[domainWidth * domainHeight * 3];
 	memset(data, 0, domainWidth * domainHeight * 3 * sizeof(char));
 
@@ -116,7 +150,9 @@ int main(int argc, char **argv)
 
 	/************* MASTER RECEIVE AND FILL CONCATENATE JOB ENDS HERE ******************/
 
-		WriteTGA_RGB("mandelbrot_par.tga", data, domainWidth, domainHeight);
+		if(image_flag == TRUE){
+			WriteTGA_RGB("mandelbrot_par.tga", data, domainWidth, domainHeight);
+		}
 		delete[] data;
 	}
 	else { 
