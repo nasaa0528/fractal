@@ -7,7 +7,6 @@ DATE: <br />
 	15-FEB-2019  <br />
 Description: <br />
 Naive implementation of Mandelbrot set algorithm in MPI. It uses loop-splitting approach to decompose task.  <br />
-
 Goal: <br />
 Practicing parallel programming environment and measure speed difference between serial and parallel versions. <br />
 
