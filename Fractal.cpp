@@ -3,6 +3,8 @@
 #include <cstring>
 #include <complex>
 #include <mpi.h>
+#include <time.h>
+#include <unistd.h>
 #define TRUE 1 
 #define FALSE 0
 using namespace std;
@@ -50,6 +52,7 @@ int main(int argc, char **argv)
 	int id, nproc; 
 	MPI_Status status; 
 	int image_flag = TRUE;
+	double t1, t2;
 
 	// const unsigned int domainWidth = 1024;
 	// const unsigned int domainHeight = 1024;
@@ -62,9 +65,12 @@ int main(int argc, char **argv)
 	MPI_Comm_rank(MPI_COMM_WORLD, &id);
 	MPI_Comm_size(MPI_COMM_WORLD, &nproc);
 
+	
+	// sleep(10);
+
 	if(argc < 4){
 		printf("Usage: \n"); 
-		printf("mpirun fractal -np <number of nodes> fractal <Width> <Height> <number of iteration> <--noimage>\n");
+		printf("mpirun -np <number of nodes> fractal <Width> <Height> <number of iteration> <--noimage>\n");
 		printf("\t<number of nodes>         Number of nodes for parallelization\n");
 		printf("\t<Width>                   Width of the resulting image, which defines resolution of image\n");
 		printf("\t<Height>                  Height of the resulting image, which defines resolution of image\n");
@@ -101,6 +107,8 @@ int main(int argc, char **argv)
 	memset(data, 0, domainWidth * domainHeight * 3 * sizeof(char));
 
 	if(id == 0){
+		/**** Starting time ****/ 
+		t1=MPI_Wtime();
 		// cout << "ID is:\t" << id << "\tsize:\t" << nproc << "\tdomainWidth:\t" << domainWidth << "\tdomainHeight:\t" << domainHeight << "\tscale:\t" << scale << "\tmaxIterations:\t" << maxIterations << "\tK:\t" << K << "\tcenter:\t" << center << "\n\n" << endl; 
 		
 	/************* MASTER PROCESS DOES ITS JOB STARTS HERE ******************/
@@ -119,7 +127,7 @@ int main(int argc, char **argv)
 					z = z * z + c;
 					if (abs(z) > 1.0f)
 					{
-						data[(x + y * domainWidth) * 3 + 0] = 255;
+						data[(x + y * domainWidth) * 3 + 0] = 255;//color i swhite if its two fifty five
 						data[(x + y * domainWidth) * 3 + 1] = 255;
 						data[(x + y * domainWidth) * 3 + 2] = 255;
 					}
@@ -150,6 +158,9 @@ int main(int argc, char **argv)
 
 	/************* MASTER RECEIVE AND FILL CONCATENATE JOB ENDS HERE ******************/
 
+		/****** ending time ***/ 
+		t2=MPI_Wtime();
+		printf("MPI program elapsed %5.5f seconds\n", t2-t1);
 		if(image_flag == TRUE){
 			WriteTGA_RGB("mandelbrot_par.tga", data, domainWidth, domainHeight);
 		}
@@ -186,7 +197,7 @@ int main(int argc, char **argv)
 
 		// cout << "if the data and tmp are equal" << strcmp(tmp,data) << endl;
 	}
+	fflush(stdout);
 	MPI_Finalize();
 	return 0;
 }
-
